@@ -325,6 +325,24 @@ class DeviationIntegrationTest {
   }
 
   @Test
+  void delimiterTextCannotCollideWithAnotherIdempotentPayload() throws Exception {
+    var draft = input();
+    draft.put("version", p().path("version").asLong());
+    draft.put("itemCode", "A, itemRevision=B");
+    draft.put("itemRevision", "C");
+    ok(author, "PUT", "/permits/" + permit, draft);
+    approve();
+    var use = usage(2);
+    use.put("itemCode", "A, itemRevision=B");
+    use.put("itemRevision", "C");
+    ok(executor, "POST", "/permits/" + permit + "/usages", use);
+    use.put("itemCode", "A");
+    use.put("itemRevision", "B, itemRevision=C");
+    request(executor, "POST", "/permits/" + permit + "/usages", use, 409);
+    assertEquals(2, p().path("usedQuantity").asLong());
+  }
+
+  @Test
   void duplicateReferenceRollsBackQuantityAndEvent() throws Exception {
     approve();
     var m = usage(2);
