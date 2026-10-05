@@ -15,6 +15,8 @@ public class DeviationService {
   final Store db;
   final AccessService access;
   final Clock clock;
+  final tools.jackson.databind.json.JsonMapper json =
+      tools.jackson.databind.json.JsonMapper.builder().findAndAddModules().build();
 
   public DeviationService(Store d, AccessService a, Clock c) {
     db = d;
@@ -270,7 +272,7 @@ public class DeviationService {
         };
     gate(perm);
     var p = permit(id);
-    String payload = "command:" + id + ":" + action + ":" + v;
+    String payload = "command:" + id + ":" + action + ":" + json.writeValueAsString(v);
     var replay = replay(v.requestKey, payload);
     if (replay != null) return view(p);
     DeviationPolicy.version(p.version, v.version);
@@ -330,7 +332,7 @@ public class DeviationService {
     assigned(p.executorId);
     if (!access.role().scope.equals("ALL") && !access.current().departmentId.equals(p.departmentId))
       throw new Problem(403, "OUT_OF_SCOPE");
-    String payload = "use:" + id + ":" + v;
+    String payload = "use:" + id + ":" + json.writeValueAsString(v);
     Long old = replay(v.requestKey, payload);
     if (old != null) return usageView(db.get(PermitUsage.class, old));
     DeviationPolicy.version(p.version, v.version);
@@ -363,7 +365,7 @@ public class DeviationService {
     assigned(p.approverId);
     var u = db.get(PermitUsage.class, usageId);
     if (!u.permitId.equals(p.id)) throw new Problem(404, "NOT_FOUND");
-    String payload = "void:" + permitId + ":" + usageId + ":" + v;
+    String payload = "void:" + permitId + ":" + usageId + ":" + json.writeValueAsString(v);
     var old = replay(v.requestKey, payload);
     if (old != null) return usageView(u);
     DeviationPolicy.version(p.version, v.version);
