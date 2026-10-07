@@ -1,8 +1,10 @@
+[中文](README.md) | [English](README.en.md)
+
 <p align="center"><img src="frontend/public/brand/logo.jpg" alt="知华科技正式 LOGO" width="200"></p>
 
 # DeviationFlow · 临时工艺偏差授权与使用台账
 
-**知华科技 · 上海如静知华信息科技有限公司**
+**知华科技（上海如静知华信息科技有限公司）**
 官网：<https://www.zhuatech.cn/> · 商业咨询微信：**zhuatech / zhuatech2**
 
 **公开源码学习版／非商业源码版，未经书面授权不得商用。** 自有代码适用 [ZhuaTech Non-Commercial Source License 1.0](LICENSE)，不是 OSI 开源许可证。商业授权、定制开发、部署和系统集成请联系知华科技。第三方组件保留各自许可，见 [第三方声明](THIRD_PARTY_NOTICES.md)。
@@ -11,7 +13,7 @@
 
 原工装临时不可用、局部工艺需要暂时调整时，偏差应先说明范围、风险控制和外部授权依据，再由技术人员复核、独立人员批准。执行时必须匹配物料、修订和工单范围，不能超过日期或数量边界。
 
-DeviationFlow 将这条流程落实为可运行的 Web 应用：**申请 → 技术复核 → 独立批准 → 限期限量使用 → 独立冲正／撤销／关闭**。适用于学习内部临时工艺授权的分工与台账实现；不承担现场安全决策、合规认证或客户审批效力判断。
+采用 Java 21、Spring Boot、Vue 3、MySQL 与 Flyway，DeviationFlow 将这条流程落实为可运行的 Web 应用：**申请 → 技术复核 → 独立批准 → 限期限量使用 → 独立冲正／撤销／关闭**。适用于学习内部临时工艺授权的分工与台账实现；不承担现场安全决策、合规认证或客户审批效力判断。
 
 ### 与其他系统的边界
 
@@ -37,24 +39,38 @@ DeviationFlow 将这条流程落实为可运行的 Web 应用：**申请 → 技
 ## 当前运行页面
 
 ### 1. 登录
+账号登录入口，通过服务端会话认证。
+
 ![登录页面](docs/screenshots/login.jpg)
 
 ### 2. 申请人员授权列表
+申请人员查询授权状态、物料修订、范围、日期和数量边界。
+
 ![授权列表](docs/screenshots/permits.jpg)
 
 ### 3. 技术复核人员工作台
+指定技术复核人员查看本人待办，按职责复核控制措施与申请事实。
+
 ![技术复核工作台](docs/screenshots/workbench.jpg)
 
 ### 4. 指定执行人使用与额度详情
+指定执行人员登记实际使用，查看净用量和保留的原始及冲正记录。
+
 ![使用台账](docs/screenshots/usage.jpg)
 
 ### 5. 授权统计
+按授权范围和单位分别汇总额度、净使用及授权状态，不混加不同单位。
+
 ![使用统计](docs/screenshots/statistics.jpg)
 
 ### 6. 系统账号管理
+管理员维护岗位、部门与启停；业务审批仍须指定人员完成。
+
 ![账号管理](docs/screenshots/accounts.jpg)
 
 ### 7. 角色与数据范围
+配置注册权限和 ALL／DEPARTMENT／SELF 数据范围，服务端独立执行。
+
 ![角色权限](docs/screenshots/roles.jpg)
 
 ## 技术架构与目录
@@ -112,9 +128,13 @@ docker compose -p deviationflow-local up --build -d --wait
 ```bash
 # 先通过 Compose 启动完整本地基础设施，或自行准备独立 MySQL。
 cd backend
-mvn spotless:check test
+mvn spotless:check test package
 mvn spring-boot:run
-# 另一个终端
+```
+
+另一个终端从仓库根目录启动前端：
+
+```bash
 cd frontend
 npm ci
 npm run dev
@@ -132,7 +152,7 @@ docker compose -p deviationflow-local logs --tail=100 backend
 docker compose -p deviationflow-local down
 ```
 
-普通 `down` 保留数据卷。`down -v` 仅用于明确允许丢弃的测试库。正式部署应使用独立数据库和账号、HTTPS 反向代理、`COOKIE_SECURE=true`、访问控制、离线备份与恢复演练。修改监听范围前确认网络边界。详见 [部署](docs/DEPLOYMENT.md)、[数据库](docs/DATABASE.md)、[安全](docs/SECURITY.md)。
+主动重启时先重启 MySQL 并等待健康，再重启后端并等待健康，最后重启前端，使其代理解析当前后端地址。普通 `down` 保留数据卷。`down -v` 仅用于明确允许丢弃的测试库。正式部署应使用独立数据库和账号、HTTPS 反向代理、`COOKIE_SECURE=true`、访问控制、离线备份与恢复演练。修改监听范围前确认网络边界。详见 [部署](docs/DEPLOYMENT.md)、[数据库](docs/DATABASE.md)、[安全](docs/SECURITY.md)。
 
 ## 安全与数据范围
 
@@ -144,7 +164,7 @@ docker compose -p deviationflow-local down
 
 ```bash
 cd backend
-mvn spotless:check test
+mvn spotless:check test package
 cd ../frontend
 npm ci
 npm run format:check
@@ -177,6 +197,8 @@ python3 scripts/release-check.py
 欢迎提交可复现的问题、测试和小范围修复。请保留品牌、版权和许可声明；不要提交客户资料、账号密码或真实业务数据。提交前运行格式、测试、构建，数据库变更新增迁移，说明行为变化。贡献须具有合法授权，与自有代码许可兼容。
 
 ## 联系知华科技
+
+商业授权或深度定制开发请联系知华科技。
 
 **上海如静知华信息科技有限公司**
 官网：<https://www.zhuatech.cn/>
